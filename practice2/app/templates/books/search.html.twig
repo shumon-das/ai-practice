@@ -1,0 +1,33 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Search Books{% endblock %}
+
+{% block body %}
+    <div class="row my-4">
+        <div class="col-3"></div>
+        <div class="col-6">
+            <div class="col-6">
+                <form action="{{ path('app_search_book') }}" method="post">
+                    <label class="visually-hidden" for="inlineFormInputGroupUsername">Username</label>
+                    <div class="input-group">
+                        {# <div class="input-group-text">@</div> #}
+                        <input type="text" class="form-control" id="inlineFormInputGroupUsername" name="search" required placeholder="Search">
+                        <input type="submit" value="Search" class="input-group-text">
+                    </div>
+                </form>    
+            </div>
+            <div>
+                {% if data is not empty %}
+                        {% for book in data %}
+                            <div class="border-bottom">
+                                <h4>{{ book.title }}</h4>
+                                <p>{{ book.content }}</p>
+                            </div>
+                        {% endfor %}
+                {% else %}
+                    <p>No books found.</p>
+                {% endif %} 
+            </div>
+        </div>
+    </div>
+{% endblock %}

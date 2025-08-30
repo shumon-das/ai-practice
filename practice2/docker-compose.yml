@@ -1,0 +1,63 @@
+services:
+  vectornginx:
+    image: nginx:alpine
+    volumes:
+      - ./app:/var/www/html
+      - ./app/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "8080:80"
+    depends_on:
+      - vectorbackend
+    networks:
+      - appnet    
+
+  vectorbackend:
+    image: vectorpractice
+    build: ./app
+    volumes:
+      - ./app:/var/www/html
+    working_dir: /var/www/html
+    environment:
+      DATABASE_URL: postgresql://myuser:mypassword@postgres:5432/mydb?serverVersion=16&charset=utf8"
+    networks:
+      - appnet  
+
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama:/root/.ollama  # persist downloaded models
+    networks:
+      - appnet  
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: pgvector
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - appnet   
+
+  adminer:
+    image: adminer
+    container_name: vector-adminer
+    restart: always
+    ports:
+      - "8020:8080"
+    networks:
+      - appnet  
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  pgdata:      

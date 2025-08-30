@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Insert Books{% endblock %}
+
+{% block body %}
+    <div>
+        <h1>Insert a New Book</h1>
+        <p style="margin-bottom: 20px;padding: 10px;background-color: lightgray">{{ message }}</p>
+        <form action="{{ path('app_save_book') }}" method="post">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required><br><br>
+
+            <label for="content">Content:</label><br>
+            <textarea id="content" name="content" rows="10" cols="50" required></textarea><br><br>
+
+            <input type="submit" value="Insert Book">
+        </form>
+    </div>
+{% endblock %}
