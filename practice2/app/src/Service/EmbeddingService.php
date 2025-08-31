@@ -18,6 +18,27 @@ class EmbeddingService
         $this->conn = $conn;
     }
 
+    public function embedWithDownloadedModel(string $text): array
+    {
+        $url = "http://ollama:11434/api/embeddings";
+
+        $response = $this->http->request('POST', $url, [
+            'headers' => ['Content-Type'  => 'application/json'],
+            'json' => [
+                "model" => "Definity/snowflake-arctic-embed-l-v2.0-q8_0:latest",
+                "prompt" => $text
+            ]
+        ]);
+
+        $data = $response->toArray();
+
+        if (isset($data['error'])) {
+            throw new \RuntimeException("HF API error: " . $data['error']);
+        }
+
+        return $data['embedding'];
+    }
+
     public function embed(string $text): array
     {
         $url = "https://api.mistral.ai/v1/embeddings";
@@ -44,8 +65,10 @@ class EmbeddingService
 
     public function saveDocument(string $title, string $content, array $data): void
     {
-        $titleEmbed = $this->embed($title);
-        $contentEmbed = $this->embed($content);
+        // $titleEmbed = $this->embed($title);
+        $titleEmbed = $this->embedWithDownloadedModel($title);
+        // $contentEmbed = $this->embed($content);
+        $contentEmbed = $this->embedWithDownloadedModel($content);
         $titleVectorStr = '[' . implode(',', $titleEmbed) . ']';
         $contentVectorStr = '[' . implode(',', $contentEmbed) . ']';
 
@@ -59,7 +82,8 @@ class EmbeddingService
 
     public function search(string $query, int $limit = 5): array
     {
-        $embedding = $this->embed($query);
+        // $embedding = $this->embed($query);
+        $embedding = $this->embedWithDownloadedModel($query);
         $vectorStr = '[' . implode(',', $embedding) . ']';
 
         $sql = '

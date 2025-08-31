@@ -134,4 +134,31 @@ Class IndexController extends AbstractController
             'data' => []
         ]);
     }
+
+    #[Route('/books/embedding/test', name: 'app_books_embedding_test')]
+    public function test(EmbeddingService $embeddingService): JsonResponse
+    {
+        $text = "Sample text for embedding";
+        $embedding = $embeddingService->embedWithDownloadedModel($text);
+
+        return new JsonResponse([
+            'status' => true,
+            'message' => 'Embedding test completed!',
+            'data' => $embedding
+        ]);
+    }
+
+    #[Route('/books/total-chars', name: 'app_books_total_chars')]
+    public function totalChars(EntityManagerInterface $em): JsonResponse
+    {
+        $conn = $em->getConnection();
+        $sql = 'SELECT SUM(LENGTH(content)) as total_chars FROM books';
+        $stmt = $conn->prepare($sql);
+        $result = $stmt->executeQuery();
+        $totalChars = $result->fetchOne();  
+        return new JsonResponse([
+            'status' => true,
+            'total_chars' => $totalChars
+        ]);
+    }    
 }
