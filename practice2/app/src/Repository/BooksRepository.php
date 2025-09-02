@@ -52,17 +52,32 @@ class BooksRepository extends ServiceEntityRepository
         return (int) ($result['total'] ?? 0);
     }
 
-    public function findBooks(int $startBookId = 1, int $maxResults = 5): array
+    public function findBooks(int $page = 1, int $limit = 5): array
     {
+        $offset = ($page - 1) * $limit;
+
         return $this->createQueryBuilder('b')
             ->select('b.id, b.title, b.content')
-            // ->orderBy('b.id', 'ASC')
-            ->where('b.id > :bindId')
-            ->setParameter('bindId', $startBookId, \Doctrine\DBAL\ParameterType::INTEGER)
             ->orderBy('b.id', 'DESC')
-            ->setMaxResults($maxResults)
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
             ->getQuery()
             ->getResult()
         ;
     }
+
+    // public function findBooks(int $page = 1, int $limit = 5): array
+    // {
+    //     $offset = ($page - 1) * $limit;
+        
+    //     return $this->createQueryBuilder('b')
+    //         ->select('b.id, b.title, b.content')
+    //         // ->orderBy('b.id', 'ASC')
+    //         ->orderBy('b.id', 'DESC')
+    //         ->setFirstResult($offset)
+    //         ->setMaxResults($limit)
+    //         ->getQuery()
+    //         ->getResult()
+    //     ;
+    // }
 }
