@@ -20,7 +20,7 @@ class EmbeddingService
 
     public function embedWithDownloadedModel(string $text): array
     {
-        $url = "http://ollama:11434/api/embeddings";
+        $url = "http://ollamatest:11434/api/embeddings";
 
         $response = $this->http->request('POST', $url, [
             'headers' => ['Content-Type'  => 'application/json'],
@@ -65,14 +65,15 @@ class EmbeddingService
 
     public function saveDocument(string $title, string $content, array $data): void
     {
-        // $titleEmbed = $this->embed($title);
+        $title   = $this->normalize($title);
+        $content = $this->normalize($content);
+
         $titleEmbed = $this->embedWithDownloadedModel($title);
-        // $contentEmbed = $this->embed($content);
         $contentEmbed = $this->embedWithDownloadedModel($content);
         $titleVectorStr = '[' . implode(',', $titleEmbed) . ']';
         $contentVectorStr = '[' . implode(',', $contentEmbed) . ']';
 
-        $jsonData = json_encode($data);
+        $jsonData = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_IGNORE);
 
         $this->conn->executeStatement(
             'INSERT INTO document (title, content, data) VALUES (:titleEmbed, :contentEmbed, :jsonData)',
@@ -97,5 +98,12 @@ class EmbeddingService
             ['embedding' => $vectorStr],
             ['embedding' => ParameterType::STRING]
         );
+    }
+
+    private function normalize(string $text): string
+    {
+        $text = mb_convert_encoding($text, 'UTF-8', 'UTF-8');
+        $text = preg_replace('/[\x00-\x1F\x7F]/u', '', $text); // strip control chars
+        return $text;
     }
 }

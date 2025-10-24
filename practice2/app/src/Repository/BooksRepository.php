@@ -80,4 +80,15 @@ class BooksRepository extends ServiceEntityRepository
     //         ->getResult()
     //     ;
     // }
+
+    public function findAllIds(): array
+    {
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT id FROM books';
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery();
+        $result = $resultSet->fetchAllAssociative();
+
+        return array_column($result, 'id');
+    }
 }

@@ -7,6 +7,13 @@ RUN apt-get update && apt-get install -y \
        pdo pdo_pgsql xml intl opcache mbstring bcmath \
     && docker-php-ext-enable opcache
 
+RUN apt-get update && apt-get install -y \
+    librabbitmq-dev \
+    && docker-php-ext-install sockets \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp
+
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

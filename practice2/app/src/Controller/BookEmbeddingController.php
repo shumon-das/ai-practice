@@ -62,7 +62,7 @@ Class BookEmbeddingController extends AbstractController
         }
 
         return $this->json([
-            'status' => 'completed',
+            'status' => true,
             'message' => 'completed'
         ]);
     }

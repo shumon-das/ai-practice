@@ -22,9 +22,9 @@ services:
     networks:
       - appnet  
 
-  ollama:
+  ollamatest:
     image: ollama/ollama:0.11.8
-    container_name: ollama
+    container_name: ollamatest
     ports:
       - "11434:11434"
     volumes:
@@ -53,8 +53,20 @@ services:
     ports:
       - "8020:8080"
     networks:
-      - appnet  
+      - appnet
 
+  rabbitmqtest:
+    image: rabbitmq:3-management
+    container_name: rabbitmqtest
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - appnet  
+    
 networks:
   appnet:
     driver: bridge
