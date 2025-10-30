@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * using guild
+ * 1) scrap:links
+ * 2) books:author
+ * 3) scrap:post:books
+ */
 namespace App\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -32,8 +37,8 @@ class ScrapLinksCommand extends Command
         $this
             ->addArgument('filename', InputArgument::OPTIONAL, 'Filename')
             ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
-            // ->addArgument('url', InputArgument::OPTIONAL, 'Url')
-            // ->addOption('option2', null, InputOption::VALUE_NONE, 'Option description')
+            ->addArgument('url', InputArgument::OPTIONAL, 'Url')
+            ->addOption('option2', null, InputOption::VALUE_NONE, 'Option description')
         ;
     }
 
@@ -46,18 +51,18 @@ class ScrapLinksCommand extends Command
             return Command::INVALID;
         }
 
-        // $url = $input->getArgument('url');
-        // if (!$url) {
-        //     $io->error('Url is Required');
-        //     return Command::INVALID;
-        // }
-        $url = 'https://bidyakolpo.in/sharadindu-bandyopadhyay-bangla-golpo-bengali-story/page/';
+        $url = $input->getArgument('url');
+        if (!$url) {
+            $io->error('Url is Required');
+            return Command::INVALID;
+        }
+        // $url = 'https://bidyakolpo.in/sharadindu-bandyopadhyay-bangla-golpo-bengali-story/page/';
 
         $linksDir = $this->params->get('kernel.project_dir') . '/links';
         if (!is_dir($linksDir)) {
             mkdir($linksDir, 0777, true);
         }
-        $filename = $linksDir . '/' . $filename . '.txt';
+        $filename = $linksDir . '/' . $filename . '.php';
 
         try {
             $client = HttpClient::create([
@@ -87,7 +92,8 @@ class ScrapLinksCommand extends Command
                 $allLinks = array_merge($allLinks, $links);
             }
 
-            file_put_contents($filename, implode("\n", $allLinks));
+            $content = "<?php\n\nreturn " . var_export($allLinks, true) . ";\n";
+            file_put_contents($filename, $content);
 
             $io->success('All links scraped');
 
