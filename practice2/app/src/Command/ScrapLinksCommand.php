@@ -6,6 +6,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\DomCrawler\Crawler;
@@ -16,11 +17,24 @@ use Symfony\Component\DomCrawler\Crawler;
 )]
 class ScrapLinksCommand extends Command
 {
+    private $params;
+
+    public function __construct(ParameterBagInterface $params)
+    {
+        parent::__construct();
+        $this->params = $params;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $url = 'https://bidyakolpo.in/jashim-uddin-bangla-golpo-bengali-story/';
-        $filename = 'jasim_uddin_2.txt';
+        $url = 'https://bidyakolpo.in/premendra-mitra-bangla-golpo-bengali-story/';
+
+        $linksDir = $this->params->get('kernel.project_dir') . '/links';
+        if (!is_dir($linksDir)) {
+            mkdir($linksDir, 0777, true);
+        }
+        $filename = $linksDir .'/premendra_mitra.txt';
 
         try {
             $client = HttpClient::create([
