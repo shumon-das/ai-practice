@@ -9,7 +9,9 @@ namespace App\Command;
 
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -30,11 +32,25 @@ class BooksByAuthorCommand extends Command
         $this->params = $params;
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->addArgument('linksfilename', InputArgument::OPTIONAL, 'LinksFilename')
+            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+        ;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $linksfilename = $input->getArgument('linksfilename');
+        if (!$linksfilename) {
+            $io->error('Links Filename is Required');
+            return Command::INVALID;
+        }
+
         $directory = $this->params->get('kernel.project_dir') . '/links';
-        $file = $directory . '/nirendronath_chokroborti.php';
+        $file = $directory . '/' . $linksfilename;
         $links = include $file;
 
         $client = HttpClient::create([
@@ -70,7 +86,8 @@ class BooksByAuthorCommand extends Command
             }
         }
 
-        $io->success('help to see your options.');
+        $count = count($links);
+        $io->success("*** Total $count Book Scrapped ***");
 
         return Command::SUCCESS;
     }

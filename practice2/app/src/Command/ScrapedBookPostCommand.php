@@ -10,6 +10,8 @@ namespace App\Command;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -30,9 +32,23 @@ class ScrapedBookPostCommand extends Command
         $this->params = $params;
     }
 
+    protected function configure(): void
+    {
+        $this
+            ->addArgument('authorid', InputArgument::OPTIONAL, 'Author Id')
+            ->addOption('option1', null, InputOption::VALUE_NONE, 'Option description')
+        ;
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $authorid = $input->getArgument('authorid');
+        if (!$authorid) {
+            $io->error('Author Id is Required');
+            return Command::INVALID;
+        }
+
 
         $directory = $this->params->get('kernel.project_dir') . '/books';
         if (!is_dir($directory)) {
@@ -80,7 +96,7 @@ class ScrapedBookPostCommand extends Command
                     $node->getNode(0)->parentNode->removeChild($node->getNode(0));
                 });
                 
-                $payload = $this->setData($title, $content);
+                $payload = $this->setData($title, $content, $authorid);
                 $response = $client->request('POST', 'https://api.bookspointer.com/admin/create-book', [
                     'headers' => [
                         'Authorization' => 'Bearer ' . $token,
@@ -95,17 +111,18 @@ class ScrapedBookPostCommand extends Command
                 $io->success("$title posted successfully");
             }
         }
-        $io->success('All Books posted successfully');
+        $filesCount = count($files);
+        $io->success("*** Total $filesCount Books posted successfully ***");
 
         return Command::SUCCESS;
     }
 
-    private function setData(string $title, string $content): array
+    private function setData(string $title, string $content, int $authorid): array
     {
         $data['title'] = $title;
         $data['content'] = $content;
         $data['category']['id'] = 20;
-        $data['author']['id'] = 734;
+        $data['author']['id'] = $authorid;
         $data["estimatedReadTime"] = ["words" => 0, "minutes" => 1];
         $data['seriesName'] = '';
         $data['tags'] = [];

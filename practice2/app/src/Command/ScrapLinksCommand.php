@@ -95,7 +95,8 @@ class ScrapLinksCommand extends Command
             $content = "<?php\n\nreturn " . var_export($allLinks, true) . ";\n";
             file_put_contents($filename, $content);
 
-            $io->success('All links scraped');
+            $linksCount = count($allLinks);
+            $io->success("*** Total $linksCount links scraped ***");
 
         } catch (\Exception $e) {
             $io->error('Error: ' . $e->getMessage());
