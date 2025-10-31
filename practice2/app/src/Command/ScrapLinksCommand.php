@@ -1,9 +1,9 @@
 <?php
 /**
  * using guild
- * 1) scrap:links
- * 2) books:author
- * 3) scrap:post:books
+ * 1) scrap:links filename url
+ * 2) books:author linksfilename
+ * 3) scrap:post:books authorid
  */
 namespace App\Command;
 
